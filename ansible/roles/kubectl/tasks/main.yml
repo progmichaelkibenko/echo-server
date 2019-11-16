@@ -1,0 +1,19 @@
+---
+- name: Download kubeCtl release
+  shell: curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+  become: yes
+  become_user: root
+
+- name: Make the kubectl binary executable
+  shell: chmod +x ./kubectl
+  become: yes
+  become_user: root
+
+- name: Move the binary in to machine PATH.
+  shell: sudo mv ./kubectl /usr/local/bin/kubectl
+  become: yes
+  become_user: root  
+
+
+
+

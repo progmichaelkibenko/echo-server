@@ -1,0 +1,9 @@
+---
+- name: Install Git, Docker, VirtualBox, Minikube, Kubectl
+  hosts: all
+  roles:
+    - git
+    - docker
+    - virtualbox
+    - minikube
+    - kubectl

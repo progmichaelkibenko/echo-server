@@ -1,0 +1,50 @@
+{
+    "variables": {
+      "client_id": "",
+      "client_secret": "",
+      "subscription_id": "",
+      "tenant_id" : ""
+    },
+    "builders": [{
+      "type": "azure-arm",
+  
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "subscription_id": "{{user `subscription_id`}}",
+      "tenant_id": "{{user `tenant_id`}}",
+  
+      "os_type": "Linux",
+      "image_publisher": "Canonical",
+      "image_offer": "UbuntuServer",
+      "image_sku": "18.04-LTS",
+  
+      "managed_image_resource_group_name": "packerDemoRessourceGroup",
+      "managed_image_name": "EchoServerVMImage",
+  
+      "azure_tags": {
+          "dept": "engineering",
+          "task": "image deployment"
+      },
+  
+      "location": "West Europe",
+      "vm_size": "Standard_D2s_v3"
+    }],
+    "provisioners": [
+      {
+        "type" : "shell",
+        "script" : "scripts/install_ansible.sh"
+      },
+      {
+        "type" : "ansible-local",
+        "playbook_file" : "../ansible/site.yml",
+        "role_paths" : [
+          "../ansible/roles/docker",
+          "../ansible/roles/git",
+          "../ansible/roles/virtualbox",
+          "../ansible/roles/kubectl",
+          "../ansible/roles/minikube"
+        ],
+        "group_vars" : "../ansible/vars"
+      }
+  ]
+  }

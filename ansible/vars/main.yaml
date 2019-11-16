@@ -1,0 +1,17 @@
+virtualbox_state: 'present'
+virtualbox_version       : '5.2'
+virtualbox_install_dkms  : no
+
+virtualbox_apt_key_url_1 : 'https://www.virtualbox.org/download/oracle_vbox_2016.asc'
+virtualbox_apt_key_url_2 : 'https://www.virtualbox.org/download/oracle_vbox.asc'
+virtualbox_apt_repo      : 'deb http://download.virtualbox.org/virtualbox/debian xenial contrib'
+virtualbox_apt_pkg       : 'virtualbox-5.2'
+virtualbox_apt_dkms_pkg  : 'virtualbox-dkms'
+
+
+minilkube_curl_url: 'https://storage.googleapis.com/minikube/releases/v0.28.2/minikube-linux-amd64'
+
+kubectl_key_url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+
+docker_app_key: 'https://download.docker.com/linux/ubuntu/gpg'
+
