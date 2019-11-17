@@ -1,13 +1,13 @@
 import socket
 import sys
 
-server_ip = '13.81.25.226/192.168.99.100'
+server_ip = '192.168.99.100'
 server_port = 30000
 
 try:
     server_ip = sys.argv[1]
     server_port = int(sys.argv[2])
-except IndexError:c
+except IndexError:
     print("echo-client> Trying to connect to the default minikube ip {0}:{1}".format(server_ip, server_port))
 
 print("echo-client> Connection started")
