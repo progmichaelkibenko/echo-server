@@ -1,20 +1,20 @@
 export $(shell sed 's/=.*//' .env)
 
 terraform-init:
-	cd terraform && ./terraform init && cd ..
+	cd terraform && terraform init && cd ..
 
 terraform-plan:
 	cd terraform && \
-	./terraform plan && \
+	terraform plan && \
 	cd ..
 
 terraform-apply:
 	cd terraform && \
-	./terraform apply &&\
+	terraform apply &&\
 	cd ..
 
 packer-build:
 	cd packer && \
-	./packer build packer-deploy-azure.json && \ 
+	packer build packer-deploy-azure.json && \ 
 	cd ..
 

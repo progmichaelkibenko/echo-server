@@ -1,17 +1,25 @@
 import socket
+import sys
 
-def listen():
-    connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    connection.bind(('0.0.0.0', 5000))
-    connection.listen(10)
-    print("Connected")
+def connect(): 
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    server_address = ('0.0.0.0', 5000)
+    sock.bind(server_address)
+
+    sock.listen(1)
+
     while True:
-        current_connection, address = connection.accept()
-        while True:
-            data = current_connection.recv(2048)
-            print(data)
-            current_connection.send(data)
+        connection, client_address = sock.accept()
+        try:
+            while True:
+                data = connection.recv(16)
+                if data:
+                    connection.sendall(data)
+                else:
+                    break
+            
+        finally:
+            connection.close()
 
-if __name__ == "__main__":
-    listen()
+connect()

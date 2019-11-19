@@ -1,8 +1,10 @@
 import socket
 import sys
 
-server_ip = '192.168.99.100'
-server_port = 30000
+# 52.137.24.147:80
+
+server_ip = '52.137.24.147'
+server_port = 80
 
 try:
     server_ip = sys.argv[1]
@@ -22,7 +24,7 @@ try:
     msg = input("client>")
     while msg != 'exit':
         sock.sendall(msg.encode('utf-8'))
-        data = sock.recv(2048)
+        data = sock.recv(16)
         print("Received: %s" % data.decode('utf-8'))
         msg = input("client>")
 except socket.gaierror as e:
