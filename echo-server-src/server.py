@@ -14,5 +14,5 @@ class Handler(BaseHTTPRequestHandler):
 
 
 print('Server listening on port 80...')
-httpd = HTTPServer(('localhost', 80), Handler)
+httpd = HTTPServer(('0.0.0.0', 80), Handler)
 httpd.serve_forever()

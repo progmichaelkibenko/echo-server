@@ -58,32 +58,6 @@ resource "azurerm_network_security_group" "main" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
-  security_rule {
-    name                       = "PORT 30000"
-    description                = "Allow PORT 30000 access"
-    priority                   = 360
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "30000"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "PORT 30000"
-    description                = "Allow PORT 30000 access"
-    priority                   = 360
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "30000"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
 
 resource "azurerm_virtual_network" "main" {
@@ -98,59 +72,64 @@ resource "azurerm_subnet" "internal" {
   name                 = "${var.subnet_name}"
   virtual_network_name = "${azurerm_virtual_network.main.name}"
   resource_group_name  = "${azurerm_resource_group.main.name}"
-  address_prefix       = "10.0.1.0/24"
+  address_prefix       = "10.0.10.0/24"
 }
 
 resource "azurerm_public_ip" "main" {
-    name                         = "${var.public_ip_name}"
+    name                         = "${var.public_ip_name}${count.index}"
     location                     = "${azurerm_resource_group.main.location}"
     resource_group_name          = "${azurerm_resource_group.main.name}"
     allocation_method            = "Static"
+    count = 3
 }
 
 resource "azurerm_network_interface" "main" {
-  name                      = "NIC"
+  name                      = "NIC${count.index}"
   location                  = "${azurerm_resource_group.main.location}"
   resource_group_name       = "${azurerm_resource_group.main.name}"
   network_security_group_id = "${azurerm_network_security_group.main.id}"
+  count = 2
 
   ip_configuration {
     name                          = "nicconfig"
     subnet_id                     = "${azurerm_subnet.internal.id}"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.main.id}"
+    public_ip_address_id          = "${element(azurerm_public_ip.main.*.id, count.index)}"
   }
 }
 
 data "azurerm_public_ip" "main" {
-  name                = "${var.public_ip_name}"
+  name                = "${var.public_ip_name}${count.index}"
   resource_group_name = "${azurerm_resource_group.main.name}"
+  count = 3
 }
 
 data "azurerm_network_interface" "main" {
-  name                = "NIC"
+  name                = "NIC${count.index}"
   resource_group_name = "${azurerm_resource_group.main.name}"
+  count = 2
 }
 
 output "public_ip_address" {
-  value = "${data.azurerm_public_ip.main.ip_address}"
+  value = "${data.azurerm_public_ip.main}"
 }
 
 resource "azurerm_virtual_machine" "vm" {
-  name                             = "${var.vm_name}"
+  name                             = "${var.vm_name}${count.index}"
   location                         = "${azurerm_resource_group.main.location}"
   resource_group_name              = "${azurerm_resource_group.main.name}"
-  network_interface_ids            = ["${azurerm_network_interface.main.id}"]
+  network_interface_ids            = ["${element(azurerm_network_interface.main.*.id, count.index)}"]
   vm_size                          = "${var.vm_size}"
   delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
+  count = 2
 
   storage_image_reference {
     id = "${data.azurerm_image.search.id}"
   }
 
   storage_os_disk {
-    name              = "AZLXDEVOPS01-OS"
+    name              = "AZLXDEVOPS01-OS${count.index}"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
@@ -168,15 +147,18 @@ resource "azurerm_virtual_machine" "vm" {
 
   provisioner "remote-exec" {
       connection {
-          host = "${data.azurerm_public_ip.main.ip_address}"
+          host = "${element(data.azurerm_public_ip.main.*.ip_address, count.index)}"
           type = "ssh"
           user = "${var.admin_username}"
           password = "${var.admin_password}"
           timeout = "1m"
       }
       inline = [
+          "git clone https://github.com/progmichaelkibenko/echo-server.git",
           "cd echo-server",
-          "python3 echo-server-src/server.py"
+          "chmod +x echo-server-src/server.py",
+          "sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
+          "sudo nohup python3 echo-server-src/server.py &"
       ]
     }
 }
