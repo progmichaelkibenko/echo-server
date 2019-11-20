@@ -13,6 +13,6 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(response.getvalue())
 
 
-print('Server listening on port 8000...')
-httpd = HTTPServer(('localhost', 8000), Handler)
+print('Server listening on port 80...')
+httpd = HTTPServer(('localhost', 80), Handler)
 httpd.serve_forever()
