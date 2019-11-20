@@ -1,0 +1,5 @@
+---
+- name: Install Python
+  apt: name=python3.7 state=present
+  become: yes
+  become_user: root

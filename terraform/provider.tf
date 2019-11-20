@@ -5,7 +5,7 @@ variable "azurerm_resource_group" {
 
 variable "azurerm_image" {
     type = "string"
-    default = "EchoServerVMImage"
+    default = "EchoServerImage"
 }
 
 variable "location" {
@@ -51,6 +51,26 @@ variable "admin_username" {
 variable "admin_password" {
     type = "string"
     default = "Qwerty!!1234"
+}
+
+variable "subscription_id" {
+    type = "string"
+    default = ""
+}
+
+variable "client_id" {
+    type = "string"
+    default = ""
+}
+
+variable "client_secret" {
+    type = "string"
+    default = ""
+}
+
+variable "tenant_id" {
+    type = "string"
+    default = ""
 }
 
 

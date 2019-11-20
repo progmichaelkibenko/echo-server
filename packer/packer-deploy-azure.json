@@ -3,7 +3,9 @@
       "client_id": "",
       "client_secret": "",
       "subscription_id": "",
-      "tenant_id" : ""
+      "tenant_id" : "",
+      "image_name" : "",
+      "ressource_group" : ""
     },
     "builders": [{
       "type": "azure-arm",
@@ -18,8 +20,8 @@
       "image_offer": "UbuntuServer",
       "image_sku": "18.04-LTS",
   
-      "managed_image_resource_group_name": "packerDemoRessourceGroup",
-      "managed_image_name": "EchoServerVMImage",
+      "managed_image_resource_group_name": "{{user `ressource_group`}}",
+      "managed_image_name": "{{user `image_name`}}",
   
       "azure_tags": {
           "dept": "engineering",
@@ -38,13 +40,14 @@
         "type" : "ansible-local",
         "playbook_file" : "../ansible/site.yml",
         "role_paths" : [
-          "../ansible/roles/docker",
           "../ansible/roles/git",
-          "../ansible/roles/virtualbox",
-          "../ansible/roles/kubectl",
-          "../ansible/roles/minikube"
+          "../ansible/roles/python"
         ],
         "group_vars" : "../ansible/vars"
+      },
+      {
+        "type" : "shell",
+        "script" : "scripts/clone_server_source.sh"
       }
   ]
   }

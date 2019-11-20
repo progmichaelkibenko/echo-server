@@ -1,9 +1,6 @@
 ---
-- name: Install Git, Docker, VirtualBox, Minikube, Kubectl
+- name: Install Git and python
   hosts: all
   roles:
     - git
-    - docker
-    - virtualbox
-    - minikube
-    - kubectl
+    - python

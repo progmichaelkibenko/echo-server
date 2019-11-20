@@ -1,8 +1,8 @@
 provider "azurerm" {
-    subscription_id = ""
-    client_id       = ""
-    client_secret   = ""
-    tenant_id       = ""
+    subscription_id = "${var.subscription_id}"
+    client_id       = "${var.client_id}"
+    client_secret   = "${var.client_secret}"
+    tenant_id       = "${var.tenant_id}"
 }
 
 resource "azurerm_resource_group" "main" {
@@ -175,14 +175,8 @@ resource "azurerm_virtual_machine" "vm" {
           timeout = "1m"
       }
       inline = [
-          "sudo git clone https://github.com/progmichaelkibenko/echo-server.git",
-          "sudo minikube start",
-          "sudo kubectl apply -f ./echo-server/echo-server-src/k8s"
+          "cd echo-server",
+          "python3 echo-server-src/server.py"
       ]
     }
 }
-
-
-
-
-
