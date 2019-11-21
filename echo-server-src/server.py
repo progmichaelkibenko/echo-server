@@ -1,6 +1,10 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
 
+import socket
+hostname = socket.gethostname()
+ip = socket.gethostbyname()
+
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
@@ -8,7 +12,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         response = BytesIO()
-        response.write(b'Received:')
+        response.write(ip)
+        response.write(b': Received:')
         response.write(body)
         self.wfile.write(response.getvalue())
 
