@@ -5,7 +5,8 @@
       "subscription_id": "",
       "tenant_id" : "",
       "image_name" : "",
-      "ressource_group" : ""
+      "ressource_group" : "",
+      "location" : ""
     },
     "builders": [{
       "type": "azure-arm",
@@ -28,7 +29,7 @@
           "task": "image deployment"
       },
   
-      "location": "West Europe",
+      "location": "{{user `location`}}",
       "vm_size": "Standard_D2s_v3"
     }],
     "provisioners": [
@@ -44,10 +45,6 @@
           "../ansible/roles/python"
         ],
         "group_vars" : "../ansible/vars"
-      },
-      {
-        "type" : "shell",
-        "script" : "scripts/clone_server_source.sh"
       }
   ]
   }

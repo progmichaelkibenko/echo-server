@@ -40,7 +40,7 @@ variable "vm_name" {
 
 variable "vm_size" {
     type = "string"
-    default = "Standard_D2s_v3"
+    default = "Standard_B1ls"
 }
 
 variable "admin_username" {
@@ -72,6 +72,12 @@ variable "tenant_id" {
     type = "string"
     default = ""
 }
+
+variable "vms_num" {
+  type = "string"
+  default = "2"
+}
+
 
 
 

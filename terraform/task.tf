@@ -10,6 +10,15 @@ resource "azurerm_resource_group" "main" {
   location = "${var.location}"
 }
 
+resource "azurerm_availability_set" "main" {
+  name                         = "${var.vm_name}avset"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.main.name}"
+  platform_fault_domain_count  = "${var.vms_num}"
+  platform_update_domain_count = "${var.vms_num}"
+  managed                      = true
+}
+
 data "azurerm_image" "search" {
   name                = "${var.azurerm_image}"
   resource_group_name = "${azurerm_resource_group.main.name}"
@@ -80,11 +89,47 @@ resource "azurerm_public_ip" "main" {
     location                     = "${azurerm_resource_group.main.location}"
     resource_group_name          = "${azurerm_resource_group.main.name}"
     allocation_method            = "Static"
-    count = 3
+    count = "${var.vms_num + 1}"
+}
+
+resource "azurerm_lb" "main" {
+  resource_group_name = "${azurerm_resource_group.main.name}"
+  name                = "${var.vm_name}lb"
+  location            = "${var.location}"
+
+  frontend_ip_configuration {
+    name                 = "LoadBalancerFrontEnd"
+    public_ip_address_id = "${element(azurerm_public_ip.main.*.id, "${var.vms_num}")}"
+  }
+}
+
+resource "azurerm_lb_backend_address_pool" "main" {
+  name                = "${var.vm_name}BackendPool"
+  resource_group_name = "${azurerm_resource_group.main.name}"
+  loadbalancer_id     = "${azurerm_lb.main.id}"
+}
+
+resource "azurerm_lb_probe" "main" {
+ resource_group_name = "${azurerm_resource_group.main.name}"
+ loadbalancer_id     = "${azurerm_lb.main.id}"
+ name                = "${var.vm_name}running-probe"
+ port                = "80"
+}
+
+resource "azurerm_lb_rule" "main" {
+   resource_group_name            = "${azurerm_resource_group.main.name}"
+   loadbalancer_id                = "${azurerm_lb.main.id}"
+   name                           = "http"
+   protocol                       = "Tcp"
+   frontend_port                  = "80"
+   backend_port                   = "80"
+   backend_address_pool_id        = "${azurerm_lb_backend_address_pool.main.id}"
+   frontend_ip_configuration_name = "LoadBalancerFrontEnd"
+   probe_id                       = "${azurerm_lb_probe.main.id}"
 }
 
 resource "azurerm_network_interface" "main" {
-  name                      = "NIC${count.index}"
+  name                      = "${var.vm_name}NIC${count.index}"
   location                  = "${azurerm_resource_group.main.location}"
   resource_group_name       = "${azurerm_resource_group.main.name}"
   network_security_group_id = "${azurerm_network_security_group.main.id}"
@@ -95,29 +140,15 @@ resource "azurerm_network_interface" "main" {
     subnet_id                     = "${azurerm_subnet.internal.id}"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = "${element(azurerm_public_ip.main.*.id, count.index)}"
+    load_balancer_backend_address_pools_ids = ["${azurerm_lb_backend_address_pool.main.id}"]
   }
-}
-
-data "azurerm_public_ip" "main" {
-  name                = "${var.public_ip_name}${count.index}"
-  resource_group_name = "${azurerm_resource_group.main.name}"
-  count = 3
-}
-
-data "azurerm_network_interface" "main" {
-  name                = "NIC${count.index}"
-  resource_group_name = "${azurerm_resource_group.main.name}"
-  count = 2
-}
-
-output "public_ip_address" {
-  value = "${data.azurerm_public_ip.main}"
 }
 
 resource "azurerm_virtual_machine" "vm" {
   name                             = "${var.vm_name}${count.index}"
   location                         = "${azurerm_resource_group.main.location}"
   resource_group_name              = "${azurerm_resource_group.main.name}"
+  availability_set_id              = "${azurerm_availability_set.main.id}"
   network_interface_ids            = ["${element(azurerm_network_interface.main.*.id, count.index)}"]
   vm_size                          = "${var.vm_size}"
   delete_os_disk_on_termination    = true
@@ -158,7 +189,18 @@ resource "azurerm_virtual_machine" "vm" {
           "cd echo-server",
           "chmod +x echo-server-src/server.py",
           "sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
-          "sudo nohup python3 echo-server-src/server.py &"
+          "sudo nohup python3 echo-server-src/server.py &",
+          "sleep 30"
       ]
     }
+}
+
+data "azurerm_public_ip" "main" {
+  name                = "${var.public_ip_name}${count.index}"
+  resource_group_name = "${azurerm_resource_group.main.name}"
+  count = 3
+}
+
+output "public_ip_address" {
+  value = "${data.azurerm_public_ip.main.*.ip_address}"
 }
