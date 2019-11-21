@@ -133,7 +133,7 @@ resource "azurerm_network_interface" "main" {
   location                  = "${azurerm_resource_group.main.location}"
   resource_group_name       = "${azurerm_resource_group.main.name}"
   network_security_group_id = "${azurerm_network_security_group.main.id}"
-  count = 2
+  count = "${var.vms_num}"
 
   ip_configuration {
     name                          = "nicconfig"
@@ -153,7 +153,7 @@ resource "azurerm_virtual_machine" "vm" {
   vm_size                          = "${var.vm_size}"
   delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
-  count = 2
+  count = "${var.vms_num}"
 
   storage_image_reference {
     id = "${data.azurerm_image.search.id}"
@@ -198,7 +198,7 @@ resource "azurerm_virtual_machine" "vm" {
 data "azurerm_public_ip" "main" {
   name                = "${var.public_ip_name}${count.index}"
   resource_group_name = "${azurerm_resource_group.main.name}"
-  count = 3
+  count = "${var.vms_num + 1}"
 }
 
 output "public_ip_address" {
